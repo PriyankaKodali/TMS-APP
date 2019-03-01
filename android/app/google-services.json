@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "458343319552",
+    "firebase_url": "https://tms-project-5067.firebaseio.com",
+    "project_id": "tms-project-5067",
+    "storage_bucket": "tms-project-5067.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458343319552:android:8a7a8aa12c3c8796",
+        "android_client_info": {
+          "package_name": "com.augadh.tms"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "458343319552-ilg9shacviamvkkkkj4318ksm31eb59d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKsclWpA4Rprt8zfWAk1xtYDbDdqpMNyo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

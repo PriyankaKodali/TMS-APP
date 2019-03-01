@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">tms</string>
+    <string name="appCenterAnalytics_whenToEnableAnalytics" moduleConfig="true">ENABLE_IN_JS</string>
+</resources>
