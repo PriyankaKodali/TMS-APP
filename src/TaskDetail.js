@@ -18,7 +18,6 @@ import DateSelector from './UserDefined/DateSelector';
 import MyPicker from './UserDefined/MyPicker';
 import HTML from 'react-native-render-html';
 
-
 class Dashboard extends React.Component {
 
     constructor(props) {
@@ -29,7 +28,8 @@ class Dashboard extends React.Component {
             TaskInfo: {}, TaskLog: [], TaskId: null, LogCollapsed: true, EmployeesForAssignment: [],
             StartDate: null, EndDate: null, TaskLogAvailable: false, TaskInfoAvailable: false,
             ActionType: null, ActionTypes: [], AssignedEmployee: null, MyStatsForTask: {}, loading: false,
-            IsAcknowledged: false, TaskAssignees: assignees, Notifications: ''
+            IsAcknowledged: false, TaskAssignees: assignees, Notifications: '', Points: 0,
+            HoursWorkedError: '', QuantityWorkedError: ''
         }
     }
 
@@ -37,12 +37,11 @@ class Dashboard extends React.Component {
         var taskId = this.props.navigation.state.params.TaskId;
         var url = ApiUrl + "/api/Activities/GetTaskDetail?TaskId=" + taskId + "&employeeId=" + empId;
         MyFetch(url, "GET", null).then((data) => {
-            this.setState(
-                {
-                    TaskInfo: data["taskDetail"], Notifications: data["Notifications"],
-                    TaskId: taskId, TaskInfoAvailable: true
-                },
-                () => {
+            this.setState({ TaskInfo: data["taskDetail"], Notifications: data["Notifications"],
+                    TaskId: taskId,
+                }, () => {
+                    var points= this.state.TaskInfo["Points"]!=null ? this.state.TaskInfo["Points"] :0
+                    this.setState({ Points:  points, TaskInfoAvailable: true })
                     MyFetch(ApiUrl + "/api/Activities/GetTaskHoursWorkedInfo?TaskId=" + taskId + "&userId=" + empId, "GET", null)
                         .then((hoursData) => {
                             this.setState({
@@ -119,10 +118,13 @@ class Dashboard extends React.Component {
                     <Body>
                         <Title>{this.state.TaskId}</Title>
                     </Body>
-                    {this.state.TaskInfo.Notifications > 0 ?
-                        <Button iconRight transparent light onPress={this.MarkAsUnReadClick.bind(this)} >
-                            <Text>Mark As Unread</Text>
-                        </Button>
+                    {this.state.TaskInfo != null ?
+                        this.state.TaskInfo.Notifications > 0 ?
+                            <Button iconRight transparent light onPress={this.MarkAsUnReadClick.bind(this)} >
+                                <Text>Mark As Unread</Text>
+                            </Button>
+                            :
+                            <Right></Right>
                         : <Right></Right>}
                 </Header>
                 <ScrollView>
@@ -427,8 +429,9 @@ class Dashboard extends React.Component {
                                                                             <Text style={MasterStyles.label}>Number of Hours Worked</Text>
                                                                             <TextInput style={MasterStyles.textInput}
                                                                                 returnKeyType="next" ref="hoursWorked"
-                                                                                placeholder="No. of Hours Worked" keyboardType="numeric"
+                                                                                placeholder="No. of Hours Worked" keyboardType="number-pad"
                                                                                 enablesReturnKeyAutomatically={true}
+                                                                                onChange={(myText) => { this.handleChange(myText) }}
                                                                             />
                                                                             <Text style={MasterStyles.errorText}>{this.state.HoursWorkedError}</Text>
                                                                         </View>
@@ -442,7 +445,7 @@ class Dashboard extends React.Component {
                                                                             style={[MasterStyles.textInput, this.state.MyStatsForTask.TotalHoursWorked !== null ? MasterStyles.disabled : {}]}
                                                                             returnKeyType="next" ref="previousHours"
                                                                             placeholder="Previously worked hours"
-                                                                            keyboardType="numeric"
+                                                                            keyboardType="number-pad"
                                                                             editable={this.state.TaskInfo["Quantity"] === null}
                                                                             defaultValue={this.state.TaskInfo["Quantity"] === null ? "" : '' + this.state.TaskInfo["Quantity"]}
                                                                         />
@@ -455,7 +458,8 @@ class Dashboard extends React.Component {
                                                                             <Text style={MasterStyles.label}>Previously Worked Quantity</Text>
                                                                             <TextInput
                                                                                 style={[MasterStyles.textInput, this.state.MyStatsForTask.TotalQuantityWorked !== null ? MasterStyles.disabled : {}]}
-                                                                                keyboardType="numeric"
+                                                                                //  keyboardType="numeric"
+                                                                                keyboardType="number-pad"
                                                                                 returnKeyType="next"
                                                                                 editable={this.state.MyStatsForTask.TotalQuantityWorked === null}
                                                                                 defaultValue={this.state.MyStatsForTask.TotalQuantityWorked === null ? "" : '' + this.state.MyStatsForTask.TotalQuantityWorked} />
@@ -474,6 +478,8 @@ class Dashboard extends React.Component {
                                                                                 placeholder="Quantity Worked"
                                                                                 keyboardType="numeric"
                                                                                 enablesReturnKeyAutomatically={true}
+                                                                                onChange={(myText) => { this.handleQtyChange(myText) }}
+
                                                                             />
                                                                             <Text style={MasterStyles.errorText}> {this.state.QuantityWorkedError}</Text>
                                                                         </View>
@@ -518,6 +524,30 @@ class Dashboard extends React.Component {
                 </ScrollView>
             </Container>
         );
+    }
+
+    handleQtyChange(event) {
+        const value = event.nativeEvent.text;
+        let enteredHrs = value;
+        var exactNum = enteredHrs.replace(/[^0-9]/g, "");
+        if (enteredHrs !== exactNum) {
+            this.setState({ QuantityWorkedError: "Enter valid quantity" });
+        }
+        else {
+            this.setState({ QuantityWorkedError: "" });
+        }
+    }
+
+    handleChange(event) {
+        const value = event.nativeEvent.text;
+        let enteredHrs = value;
+        var exactNum = enteredHrs.replace(/[^0-9]/g, "");
+        if (enteredHrs !== exactNum) {
+            this.setState({ HoursWorkedError: "Enter valid hours worked" });
+        }
+        else {
+            this.setState({ HoursWorkedError: "" });
+        }
     }
 
     actionTypeChanged(itemValue) {
@@ -632,6 +662,14 @@ class Dashboard extends React.Component {
             data.append("hoursWorked", parseInt(this.refs.hoursWorked._lastNativeText));
         }
 
+        if (this.state.Points) {
+            data.append("points", this.state.Points);
+        }
+        else {
+            data.append("points", 0);
+
+        }
+
         if (this.state.ActionType === "Resolved") {
             data.append("hoursWorked", parseInt(this.refs.hoursWorked._lastNativeText));
         }
@@ -641,7 +679,6 @@ class Dashboard extends React.Component {
                 data.append("quantityWorked", parseInt(this.refs.quantityWorked._lastNativeText));
             }
         }
-
 
         MyFetch(ApiUrl + "/api/Activities/EditActivity", "POST", data)
             .then(() => {
@@ -675,6 +712,17 @@ class Dashboard extends React.Component {
         var previouslyWorkedQty = this.state.MyStatsForTask.TotalQuantityWorked;
         var startDate = moment(this.state.StartDate).format('DD-MM-YYYY');
         var currentDay = moment().format('DD-MM-YYYY');
+
+        if (this.state.HoursWorkedError != "" || this.state.QuantityWorkedError != "") {
+            if (this.state.HoursWorkedError != "") {
+                this.refs.hoursWorked.focus();
+            }
+            if (this.state.QuantityWorkedError != "") {
+                this.refs.quantityWorked.focus();
+            }
+            success = false;
+            return success;
+        }
 
         if (this.state.ActionType === "Assign") {
             if (!this.state.AssignedEmployee) {
@@ -759,7 +807,6 @@ class Dashboard extends React.Component {
                         this.setState({ StartDateError: "" });
                     }
                 }
-
             }
 
             if (!this.state.EndDate) {
@@ -837,14 +884,14 @@ class Dashboard extends React.Component {
                                 success = false;
                             }
                         }
-                    //     else if(previouslyWorkedQty<  this.state.TaskInfo["Quantity"]){
-                    //    // else if (totalquantity > this.state.TaskInfo["Quantity"]) {
-                    //         this.setState({ QuantityWorkedError: "Budgeted quantity is " + this.state.TaskInfo["Quantity"] });
-                    //         if (success) {
-                    //             this.refs.quantityWorked.focus();
-                    //             success = false;
-                    //         }
-                    //     }
+                        //     else if(previouslyWorkedQty<  this.state.TaskInfo["Quantity"]){
+                        //    // else if (totalquantity > this.state.TaskInfo["Quantity"]) {
+                        //         this.setState({ QuantityWorkedError: "Budgeted quantity is " + this.state.TaskInfo["Quantity"] });
+                        //         if (success) {
+                        //             this.refs.quantityWorked.focus();
+                        //             success = false;
+                        //         }
+                        //     }
                         else {
                             this.setState({ QuantityWorkedError: "" });
                         }
@@ -862,7 +909,6 @@ class Dashboard extends React.Component {
                         }
                     }
                 }
-
             }
         }
 
@@ -972,10 +1018,9 @@ class Dashboard extends React.Component {
                         //      }
                     }
                 }
-
             }
-
         }
+
 
         var action = this.refs.action._lastNativeText;
         if (!action || action.trim().length === 0) {

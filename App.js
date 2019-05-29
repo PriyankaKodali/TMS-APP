@@ -16,7 +16,7 @@ import StockRequests from './src/Stock/StockRequests';
 import StockRequestDetail from './src/Stock/StockRequestDetail';
 import StockRequestView from './src/Stock/StockRequestView';
 import MyReport from './src/MyReport.js';
-
+import TopPerformers from './src/TopPerformers';
 
 var RootStack = createDrawerNavigator({
   Attendance: {
@@ -45,6 +45,9 @@ var RootStack = createDrawerNavigator({
   },
   MyReport: {
     screen: MyReport
+  },
+  TopPerformers:{
+    screen: TopPerformers
   },
   Logout: {
     screen: Logout,

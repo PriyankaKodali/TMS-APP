@@ -1,9 +1,9 @@
 import React from 'react';
-import { Modal,  ScrollView, TextInput, TouchableOpacity, View, ListView} from "react-native";
+import { Modal, ScrollView, TextInput, TouchableOpacity, View, ListView } from "react-native";
 import {
-        Body, Button, Fab, Header, Icon, Left, List, ListItem,
-        Right, Spinner, Text, Title, Toast
-    } from "native-base";
+    Body, Button, Fab, Header, Icon, Left, List, ListItem,
+    Right, Spinner, Text, Title, Toast
+} from "native-base";
 import { orgId, roles } from '../Globals';
 import { MyFetch } from '../MyAjax';
 import moment from 'moment';
@@ -13,26 +13,26 @@ import DateSelector from './UserDefined/DateSelector';
 import MyPicker from './UserDefined/MyPicker';
 
 
-class MyReport extends React.Component{
+class MyReport extends React.Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
         var Priorities = [{ value: "", label: "All" }, { value: 0, label: "High" }, { value: 1, label: "Medium" }, { value: 2, label: "Low" }]
-        var Statuses = [ {value:'ALL', label:'All'}, { value: 'Closed', label: 'Closed' },{value: 'Open', label: 'Open' },
-                         { value: 'Pending', label: 'Pending' },{value:'InProcess', label:'InProcess'}, {value:'NotResolved', label:'Not Resolved'},
-                         {value:'NotClosed', label:'Not Closed'}, {value:'Resolved', label:'Resolved' },
-                         { value: 'Reopened', label: 'Reopened' }]
-          this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-            this.state={
-            MyReport:[], Status:null, active:false, FromDate:moment().startOf('week').format("YYYY-MM-DD"), 
-            ToDate: moment().format("YYYY-MM-DD"), TaskId: '', Priority:null, currentPage: 1, sizePerPage: 10, 
-            dataTotalSize: 0, IsDataAvailable: false, Priorities: Priorities, Statuses: Statuses, Status:'ALL',
-            Priority:null,ToDateError: '', FromDateError: '', Client:'',FilterModal: false,TaskIdError:'',
-            Clients:[],
+        var Statuses = [{ value: 'ALL', label: 'All' }, { value: 'Closed', label: 'Closed' }, { value: 'Open', label: 'Open' },
+        { value: 'Pending', label: 'Pending' }, { value: 'InProcess', label: 'InProcess' }, { value: 'NotResolved', label: 'Not Resolved' },
+        { value: 'NotClosed', label: 'Not Closed' }, { value: 'Resolved', label: 'Resolved' },
+        { value: 'Reopened', label: 'Reopened' }]
+        this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+        this.state = {
+            MyReport: [], Status: null, active: false, FromDate: moment().startOf('week').format("YYYY-MM-DD"),
+            ToDate: moment().format("YYYY-MM-DD"), TaskId: '', Priority: null, currentPage: 1, sizePerPage: 10,
+            dataTotalSize: 0, IsDataAvailable: false, Priorities: Priorities, Statuses: Statuses, Status: 'ALL',
+            Priority: null, ToDateError: '', FromDateError: '', Client: '', FilterModal: false, TaskIdError: '',
+            Clients: [], Category: null
         }
     }
 
-    componentWillMount(){
+    componentWillMount() {
         var OrgId = roles.indexOf("SuperAdmin") !== -1 ? null : orgId;
         MyFetch(ApiUrl + "/api/MasterData/GetClientsWithAspNetUserId?orgId=" + OrgId, "GET", null)
             .then((data) => {
@@ -49,20 +49,20 @@ class MyReport extends React.Component{
                 })
             });
 
-         this.getMyReport(this.state.currentPage, this.state.sizePerPage)
+        this.getMyReport(this.state.currentPage, this.state.sizePerPage)
     }
 
-    getMyReport(page,count){
-        var url= ApiUrl + "/api/Activities/GetMyReport?fromDate=" + moment(this.state.FromDate).format("YYYY-MM-DD") + 
-        "&toDate=" + moment(this.state.ToDate).format("YYYY-MM-DD") + "&client=" + this.state.Client +
-        "&status=" + this.state.Status+ "&priority=" + this.state.Priority +
-        "&taskId="+ this.state.TaskId
+    getMyReport(page, count) {
+        var url = ApiUrl + "/api/Reports/GetMyReport?fromDate=" + moment(this.state.FromDate).format("YYYY-MM-DD") +
+            "&toDate=" + moment(this.state.ToDate).format("YYYY-MM-DD") + "&client=" + this.state.Client +
+            "&status=" + this.state.Status + "&priority=" + this.state.Priority +
+            "&taskId=" + this.state.TaskId + "&catId=" + this.state.Category
 
-        MyFetch(url, "GET" , null).then((data)=>{
-            var myReport= this.state.MyReport;
-            myReport= myReport.concat(data["myActivityReport"]);
-            this.setState({MyReport: myReport, IsDataAvailable: true})
-        }).catch((error)=>{
+        MyFetch(url, "GET", null).then((data) => {
+            var myReport = this.state.MyReport;
+            myReport = myReport.concat(data["myActivityReport"]);
+            this.setState({ MyReport: myReport, IsDataAvailable: true })
+        }).catch((error) => {
             error.text().then(errorMessage => {
                 Toast.show({
                     text: errorMessage,
@@ -83,28 +83,28 @@ class MyReport extends React.Component{
         this.getMyReport(this.state.currentPage + 1, this.state.sizePerPage);
     }
 
-    render(){
-        return(
-            <View style={{ flexGrow: 1 }}> 
-              <Header hasTabs>
+    render() {
+        return (
+            <View style={{ flexGrow: 1 }}>
+                <Header hasTabs>
                     <Left>
-                        <Button  transparent onPress={() => this.props.navigation.openDrawer()}>
+                        <Button transparent onPress={() => this.props.navigation.openDrawer()}>
                             <Icon name="menu" />
                         </Button>
-                      </Left>
-                          <Body>
-                            <Title>My Report</Title>
-                          </Body> 
-                     <Right></Right>
+                    </Left>
+                    <Body>
+                        <Title>My Report</Title>
+                    </Body>
+                    <Right></Right>
                 </Header>
-                <List  
-                  onEndReachedThreshold={0.7}
-                  onEndReached={() => this.onEndReached()}
-                  dataArray={this.state.MyReport}
-                   renderRow={data => {
-                       return(
-                          <ListItem button onPress={()=>this.props.navigation.navigate('TaskDetail', { data })}
-                          style={[{ marginLeft: 0 }, data["Status"] === "Open" || data["Status"] === "Reopened" ? MasterStyles.open : (data["Status"] === "Pending"|| data["Status"] === "InProcess") ? MasterStyles.pending : MasterStyles.closed]}>
+                <List
+                    onEndReachedThreshold={0.7}
+                    onEndReached={() => this.onEndReached()}
+                    dataArray={this.state.MyReport}
+                    renderRow={data => {
+                        return (
+                            <ListItem button onPress={() => this.props.navigation.navigate('TaskDetail', { TaskId: data.TaskId })}
+                                style={[{ marginLeft: 0 }, data["Status"] === "Open" || data["Status"] === "Reopened" ? MasterStyles.open : (data["Status"] === "Pending" || data["Status"] === "InProcess") ? MasterStyles.pending : MasterStyles.closed]}>
                                 <Body >
                                     <Text style={data["Notifications"] > 0 ? MasterStyles.notification : {}}>
                                         <Text style={{ fontSize: 18 }}>
@@ -115,17 +115,17 @@ class MyReport extends React.Component{
 
                                     <Text note style={[]}>{data["Subject"]}</Text>
                                 </Body>
-                          </ListItem>
-                       );
-                   }}
+                            </ListItem>
+                        );
+                    }}
                 />
-               {
+                {
                     this.state.IsDataAvailable ?
                         <View />
                         :
                         <Spinner color='#03a9f4' />
                 }
-               <Fab
+                <Fab
                     active={this.state.active}
                     direction="up"
                     containerStyle={{}}
@@ -141,11 +141,11 @@ class MyReport extends React.Component{
                     </Button>
                 </Fab>
 
-              <Modal
-                animationType="slide"
-                transparent={false}
-                visible={this.state.FilterModal}
-                onRequestClose={() => { }}>
+                <Modal
+                    animationType="slide"
+                    transparent={false}
+                    visible={this.state.FilterModal}
+                    onRequestClose={() => { }}>
                     <ScrollView style={{ flex: 1, flexDirection: "column" }}>
                         <Header hasTabs >
                             <Left />
@@ -163,37 +163,35 @@ class MyReport extends React.Component{
                             <View style={MasterStyles.inputContainer}>
                                 <Text style={MasterStyles.label}>From Date</Text>
                                 <DateSelector placeholder="From Date" value={this.state.FromDate}
-                                      onChange={(date) => this.setState({ FromDate:date },()=>{
-                                        if(date==null)
-                                        {
+                                    onChange={(date) => this.setState({ FromDate: date }, () => {
+                                        if (date == null) {
                                             this.setState({ FromDateError: "From date is required" });
                                         }
                                         else {
-                                            if(moment(date).isAfter(this.state.ToDate)){
+                                            if (moment(date).isAfter(this.state.ToDate)) {
                                                 this.setState({ FromDateError: "From date is greater than to date " });
                                             }
-                                            else{
+                                            else {
                                                 this.setState({ FromDateError: "" });
                                             }
                                         }
-                                      })}
-                                    />
+                                    })}
+                                />
                                 <Text style={MasterStyles.errorText}>{this.state.FromDateError}</Text>
                             </View>
                             <View style={MasterStyles.inputContainer}>
                                 <Text style={MasterStyles.label}>To Date</Text>
                                 <DateSelector placeholder="To Date" value={this.state.ToDate}
-                                        onChange={(date) => this.setState({ ToDate: date },()=>{
-                                            if(date==null)
-                                            {
-                                                this.setState({ ToDateError: "To date required" });
-                                            }
-                                            else{
-                                                this.setState({ ToDateError: "" });
-                                            }
-                                        })}
-                                     />
-                                 <Text style={MasterStyles.errorText}>{this.state.ToDateError}</Text>
+                                    onChange={(date) => this.setState({ ToDate: date }, () => {
+                                        if (date == null) {
+                                            this.setState({ ToDateError: "To date required" });
+                                        }
+                                        else {
+                                            this.setState({ ToDateError: "" });
+                                        }
+                                    })}
+                                />
+                                <Text style={MasterStyles.errorText}>{this.state.ToDateError}</Text>
                             </View>
                             <View style={MasterStyles.inputContainer}>
                                 <Text style={MasterStyles.label}>Client</Text>
@@ -202,11 +200,11 @@ class MyReport extends React.Component{
                                     placeholder="Select Client"
                                     iosHeader="Select Client"
                                     value={this.state.Client}
-                                    onChange={(itemValue) => { 
-                                        if(!itemValue){
+                                    onChange={(itemValue) => {
+                                        if (!itemValue) {
                                             this.setState({ Client: '' })
                                         }
-                                        else{
+                                        else {
                                             this.setState({ Client: itemValue })
                                         }
                                     }}
@@ -231,11 +229,11 @@ class MyReport extends React.Component{
                                     placeholder="Select Status"
                                     iosHeader="Select Status"
                                     value={this.state.Status}
-                                    onChange={(itemValue) => { 
-                                        if(!itemValue){
+                                    onChange={(itemValue) => {
+                                        if (!itemValue) {
                                             this.setState({ Status: 'ALL' })
                                         }
-                                        else{
+                                        else {
                                             this.setState({ Status: itemValue })
                                         }
                                     }}
@@ -243,61 +241,61 @@ class MyReport extends React.Component{
                                 />
                             </View>
                             <View style={MasterStyles.inputContainer}>
-                                    <Text style={MasterStyles.label}>Task Id</Text>
-                                    <TextInput style={MasterStyles.textInput}
-                                         returnKeyType="next" ref="taskId"  placeholder="Task Id"
-                                          defaultValue={this.state.TaskId } onChangeText={(text)=>{
-                                              if(text.length>=9){
-                                                  this.setState({TaskIdError: "Enter a valid TaskId"})
-                                              }
-                                              else{
-                                                this.setState({TaskIdError: ""})
-                                              }
-                                          }}
-                                     />
-                                      <Text style={MasterStyles.errorText}>{this.state.TaskIdError}</Text>
-                             </View>
-                          
+                                <Text style={MasterStyles.label}>Task Id</Text>
+                                <TextInput style={MasterStyles.textInput}
+                                    returnKeyType="next" ref="taskId" placeholder="Task Id"
+                                    defaultValue={this.state.TaskId} onChangeText={(text) => {
+                                        if (text.length >= 9) {
+                                            this.setState({ TaskIdError: "Enter a valid TaskId" })
+                                        }
+                                        else {
+                                            this.setState({ TaskIdError: "" })
+                                        }
+                                    }}
+                                />
+                                <Text style={MasterStyles.errorText}>{this.state.TaskIdError}</Text>
+                            </View>
+
                         </View>
                     </ScrollView>
-                    <Button full info onPress={() => { 
-                        this.setState({ IsDataAvailable: false, MyReport: [] },()=>{ 
-                            if(this.state.FromDateError!=="" || this.state.ToDateError!=="" || this.state.TaskIdError!=="" ){
-                               this.setState({FilterModal: true})
+                    <Button full info onPress={() => {
+                        this.setState({ IsDataAvailable: false, MyReport: [] }, () => {
+                            if (this.state.FromDateError !== "" || this.state.ToDateError !== "" || this.state.TaskIdError !== "") {
+                                this.setState({ FilterModal: true })
                             }
-                            else{
-                                this.setState({FilterModal: false},()=>{
-                                        this.getMyReport(1, this.state.sizePerPage)
-                                     })
+                            else {
+                                this.setState({ FilterModal: false }, () => {
+                                    this.getMyReport(1, this.state.sizePerPage)
+                                })
                             }
-                               }); 
-                         }}
-                        >
+                        });
+                    }}
+                    >
                         <Text>Ok</Text>
                     </Button>
-             </Modal>
-        
+                </Modal>
+
             </View>
         )
     }
 
-   
-    renderStars(priority){
-        var number= 0;
-        if(priority=="HIGH"){
-             number=0;
+
+    renderStars(priority) {
+        var number = 0;
+        if (priority == "HIGH") {
+            number = 0;
         }
-        else if(priority=="MEDIUM"){
-            number=1;
+        else if (priority == "MEDIUM") {
+            number = 1;
         }
-        else{
-            number=2;
+        else {
+            number = 2;
         }
-       var stars=[];
-       for(var i=0; i<3-number; i++){
-        stars.push(<Icon key={i} name="star" active={true} style={[{ fontSize: 19, lineHeight: 20 }, number === 0 ? MasterStyles.high : number === 1 ? MasterStyles.medium : MasterStyles.low]} />);
-       }
-       return stars;
+        var stars = [];
+        for (var i = 0; i < 3 - number; i++) {
+            stars.push(<Icon key={i} name="star" active={true} style={[{ fontSize: 19, lineHeight: 20 }, number === 0 ? MasterStyles.high : number === 1 ? MasterStyles.medium : MasterStyles.low]} />);
+        }
+        return stars;
     }
 
     priorityChanged(itemValue) {

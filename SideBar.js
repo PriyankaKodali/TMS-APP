@@ -17,6 +17,7 @@ const routes = [
     { Name: "Dashboard", Route: "Dashboard" },
     { Name: "Task List", Route: "TaskList" },
     { Name: "My Report", Route: "MyReport"},
+    { Name: "Top Performers", Route: "TopPerformers" },
     { Name: "Logout", Route: "Logout" }
 ];
 

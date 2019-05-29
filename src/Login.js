@@ -43,7 +43,6 @@ class Login extends Component {
                 {/* <Loader loading={this.state.loading} /> */}
                 <View style={styles.loginContainer}>
                     <Image resizeMode="contain" style={styles.logo} source={require('../assets/images/logo.png')} />
-
                 </View>
                 {
                     this.state.loading ? <Spinner color='#03a9f4' /> :
