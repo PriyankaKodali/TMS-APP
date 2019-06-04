@@ -8,6 +8,7 @@ import ToDoList from './Tasks/ToDoList';
 import CreatedByMe from './Tasks/CreatedByMe';
 import ThroughMe from './Tasks/ThroughMe';
 import ToDoPendingList from './Tasks/ToDoPendingList';
+import ToDosInHold from "./Tasks/ToDosInHold";
 
 class Dashboard extends React.Component {
     constructor(props) {
@@ -48,9 +49,15 @@ class Dashboard extends React.Component {
                             </Content>
                         </Tab>
 
-                        <Tab heading="To Do Pending">
+                        {/* <Tab heading="To Do Pending">
                             <Content contentContainerStyle={{ flex: 1 }}>
                                 <ToDoPendingList navigation={this.props.navigation} ref="toDoPending" style={{ flexGrow: 1 }} />
+                            </Content>
+                        </Tab> */}
+
+                        <Tab heading="To Do's In Hold">
+                            <Content contentContainerStyle={{ flex: 1 }}>
+                                <ToDosInHold navigation={this.props.navigation} ref="toDosInHold" style={{ flexGrow: 1 }} />
                             </Content>
                         </Tab>
 
@@ -74,6 +81,9 @@ class Dashboard extends React.Component {
     refreshTasks() {
         if (this.refs.toDo) {
             this.refs.toDo.refreshTasks();
+        }
+        if (this.refs.toDosInHold) {
+            this.refs.toDosInHold.refreshTasks();
         }
         if (this.refs.byMe) {
             this.refs.byMe.refreshTasks();

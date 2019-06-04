@@ -90,13 +90,13 @@ class Dashboard extends React.Component {
                                     </Content>
                                 </Tab>
                             
-                                <Tab heading="To Do Pending">
+                                <Tab heading="To Do's In Hold ">
                                    <Content padder>
                                      <Card>
                                        <CardItem style={styles.total}>
                                         <Body style={styles.cardBody}>
                                         <H1 style={[MasterStyles.TextCenter, {flexGrow:1}]}> Total Tasks</H1>
-                                        <H1 style={[MasterStyles.TextCenter]}> {this.state.activitiesSummary["TotalToDoPending"]} </H1>
+                                        <H1 style={[MasterStyles.TextCenter]}> {this.state.activitiesSummary["TotalToDoInHold"]} </H1>
                                       </Body>
                                    </CardItem>
                                </Card>
@@ -104,7 +104,7 @@ class Dashboard extends React.Component {
                              <CardItem style={styles.high}>
                                   <Body style={styles.cardBody}>
                                   <H1 style={[MasterStyles.TextCenter, MasterStyles.White, { flexGrow: 1 }]}>High Priority</H1>
-                                  <H1 style={[MasterStyles.TextCenter, MasterStyles.White]}>{this.state.activitiesSummary["HighToDoPending"]}</H1>
+                                  <H1 style={[MasterStyles.TextCenter, MasterStyles.White]}>{this.state.activitiesSummary["HighToDoInHold"]}</H1>
                                     </Body>
                                 </CardItem>
                              </Card>
@@ -112,7 +112,7 @@ class Dashboard extends React.Component {
                                  <CardItem style={styles.medium}>
                                      <Body style={styles.cardBody}>
                                             <H1 style={[MasterStyles.TextCenter, MasterStyles.White, { flexGrow: 1 }]}>Medium Priority</H1>
-                                            <H1 style={[MasterStyles.TextCenter, MasterStyles.White]}>{this.state.activitiesSummary["MediumToDoPending"]}</H1>
+                                            <H1 style={[MasterStyles.TextCenter, MasterStyles.White]}>{this.state.activitiesSummary["MediumToDoInHold"]}</H1>
                                       </Body>
                                   </CardItem>
                              </Card>
@@ -120,7 +120,7 @@ class Dashboard extends React.Component {
                                   <CardItem style={styles.low}>
                                      <Body style={styles.cardBody}>
                                                     <H1 style={[MasterStyles.TextCenter, MasterStyles.White, { flexGrow: 1 }]}>Low Priority</H1>
-                                                    <H1 style={[MasterStyles.TextCenter, MasterStyles.White]}>{this.state.activitiesSummary["LowToDoPending"]}</H1>
+                                                    <H1 style={[MasterStyles.TextCenter, MasterStyles.White]}>{this.state.activitiesSummary["LowToDoInHold"]}</H1>
                                                 </Body>
                                             </CardItem>
                                         </Card>
@@ -202,6 +202,7 @@ class Dashboard extends React.Component {
                                         </Card>
                                     </Content>
                                 </Tab>
+                           
                             </Tabs>
                             :
 

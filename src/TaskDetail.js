@@ -29,7 +29,7 @@ class Dashboard extends React.Component {
             StartDate: null, EndDate: null, TaskLogAvailable: false, TaskInfoAvailable: false,
             ActionType: null, ActionTypes: [], AssignedEmployee: null, MyStatsForTask: {}, loading: false,
             IsAcknowledged: false, TaskAssignees: assignees, Notifications: '', Points: 0,
-            HoursWorkedError: '', QuantityWorkedError: ''
+            HoursWorkedError: '', QuantityWorkedError: '', RemindDate: null, RemindDateError: ''
         }
     }
 
@@ -37,50 +37,51 @@ class Dashboard extends React.Component {
         var taskId = this.props.navigation.state.params.TaskId;
         var url = ApiUrl + "/api/Activities/GetTaskDetail?TaskId=" + taskId + "&employeeId=" + empId;
         MyFetch(url, "GET", null).then((data) => {
-            this.setState({ TaskInfo: data["taskDetail"], Notifications: data["Notifications"],
-                    TaskId: taskId,
-                }, () => {
-                    var points= this.state.TaskInfo["Points"]!=null ? this.state.TaskInfo["Points"] :0
-                    this.setState({ Points:  points, TaskInfoAvailable: true })
-                    MyFetch(ApiUrl + "/api/Activities/GetTaskHoursWorkedInfo?TaskId=" + taskId + "&userId=" + empId, "GET", null)
-                        .then((hoursData) => {
-                            this.setState({
-                                MyStatsForTask: hoursData["activitylog"], StartDate: hoursData["activitylog"]["StartDate"],
-                                EndDate: hoursData["activitylog"]["EndDate"]
-                            }, () => {
-                                var actionTypes = [];
+            this.setState({
+                TaskInfo: data["taskDetail"], Notifications: data["Notifications"],
+                TaskId: taskId,
+            }, () => {
+                var points = this.state.TaskInfo["Points"] != null ? this.state.TaskInfo["Points"] : 0
+                this.setState({ Points: points, TaskInfoAvailable: true })
+                MyFetch(ApiUrl + "/api/Activities/GetTaskHoursWorkedInfo?TaskId=" + taskId + "&userId=" + empId, "GET", null)
+                    .then((hoursData) => {
+                        this.setState({
+                            MyStatsForTask: hoursData["activitylog"], StartDate: hoursData["activitylog"]["StartDate"],
+                            EndDate: hoursData["activitylog"]["EndDate"]
+                        }, () => {
+                            var actionTypes = [];
 
-                                if (this.state.TaskInfo["CreatedById"] === empId) {
-                                    if (this.state.TaskInfo["Status"] === "Resolved") {
-                                        actionTypes = [{ value: "AcceptToClose", label: "Accept To Close" }, { value: "Comments", label: "Comments/Remarks" }, { value: "Reopen", label: "Reopen" }]
-                                    }
-                                    else {
-                                        // if (this.state.TaskInfo["Status"] === "Pending" || this.state.TaskInfo["Status"] === "Open" || this.state.TaskInfo["Status"] === "Reopened") {
-                                        actionTypes = [{ value: "AcceptToClose", label: "Accept To Close" }, { value: "Comments", label: "Comments/Remarks" }]
-                                    }
+                            if (this.state.TaskInfo["CreatedById"] === empId) {
+                                if (this.state.TaskInfo["Status"] === "Resolved") {
+                                    actionTypes = [{ value: "AcceptToClose", label: "Accept To Close" }, { value: "Comments", label: "Comments/Remarks" }, { value: "Reopen", label: "Reopen" }]
                                 }
-                                else if (this.state.TaskInfo["TaskOwnerId"] == empId && this.state.TaskInfo["Status"] !== "Closed") {
-                                    if (this.state.StartDate === null) {
-                                        actionTypes = [{ value: "Assign", label: "Assign" }, { value: "InProcess", label: "InProcess/Acknowledgement" }, { value: "Pending", label: "Pending" }]
-                                    }
-                                    else {
-                                        this.setState({ IsAcknowledged: true })
-                                        actionTypes = [{ value: "Assign", label: "Assign" }, { value: "Pending", label: "Pending" }, { value: "Resolved", label: "Resolved" }]
+                                else {
+                                    // if (this.state.TaskInfo["Status"] === "Pending" || this.state.TaskInfo["Status"] === "Open" || this.state.TaskInfo["Status"] === "Reopened") {
+                                    actionTypes = [{ value: "AcceptToClose", label: "Accept To Close" }, { value: "Comments", label: "Comments/Remarks" }]
+                                }
+                            }
+                            else if (this.state.TaskInfo["TaskOwnerId"] == empId && this.state.TaskInfo["Status"] !== "Closed") {
+                                if (this.state.StartDate === null) {
+                                    actionTypes = [{ value: "Assign", label: "Assign" }, { value: "InProcess", label: "InProcess/Acknowledgement" }, { value: "Pending", label: "Pending" }, { value: "Hold", label: "Hold" }]
+                                }
+                                else {
+                                    this.setState({ IsAcknowledged: true })
+                                    actionTypes = [{ value: "Assign", label: "Assign" }, { value: "Pending", label: "Pending" }, { value: "Resolved", label: "Resolved" }, { value: "Hold", label: "Hold" }]
 
-                                    }
                                 }
-                                this.setState({ ActionTypes: actionTypes })
-                            })
-                        }).catch((error) => {
-                            Toast.show({
-                                text: error,
-                                buttonText: 'Okay',
-                                position: "bottom",
-                                duration: 10000,
-                                type: "danger"
-                            })
+                            }
+                            this.setState({ ActionTypes: actionTypes })
                         })
-                })
+                    }).catch((error) => {
+                        Toast.show({
+                            text: error,
+                            buttonText: 'Okay',
+                            position: "bottom",
+                            duration: 10000,
+                            type: "danger"
+                        })
+                    })
+            })
         }).catch((error) => {
             Toast.show({
                 text: error,
@@ -404,6 +405,20 @@ class Dashboard extends React.Component {
                                                                         :
                                                                         <View />
                                                                 }
+                                                                {
+                                                                    this.state.ActionType === "Hold" ?
+                                                                        <View>
+                                                                            <View style={MasterStyles.inputContainer} ref="startDate" accessible={true}>
+                                                                                <Text style={MasterStyles.label}>Remind on</Text>
+                                                                                <DateSelector placeholder="Remind Date" value={this.state.RemindDate} ref="remindDate"
+                                                                                    onChange={(date) => this.setState({ RemindDate: date })}
+                                                                                />
+                                                                                <Text style={MasterStyles.errorText}>{this.state.RemindDateError}</Text>
+                                                                            </View>
+                                                                        </View>
+                                                                        :
+                                                                        <View />
+                                                                }
 
                                                                 {
                                                                     this.state.MyStatsForTask.TotalHoursWorked !== null && this.state.ActionType !== "Comments" ?
@@ -662,6 +677,10 @@ class Dashboard extends React.Component {
             data.append("hoursWorked", parseInt(this.refs.hoursWorked._lastNativeText));
         }
 
+        if (this.state.ActionType === "Hold") {
+            data.append("remindDate",  moment(this.state.RemindDate).format("YYYY-MM-DD"));
+        }
+
         if (this.state.Points) {
             data.append("points", this.state.Points);
         }
@@ -722,6 +741,28 @@ class Dashboard extends React.Component {
             }
             success = false;
             return success;
+        }
+
+        if (this.state.ActionType === "Hold") {
+            if (!this.state.RemindDate) {
+                this.setState({ RemindDateError: "Remind date required" });
+                if (success) {
+                    success = false;
+                 //   this.refs.remindDate.focus();
+                }
+            }
+            else {
+                if (moment(this.state.RemindDate).format('DD-MM-YYYY') <= moment().format('DD-MM-YYYY')) {
+                    this.setState({ RemindDateError: "Remind date should be greater than current date" });
+                    if (success) {
+                        success = false;
+                      //  this.refs.remindDate.focus();
+                    }
+                }
+                else {
+                    this.setState({ RemindDateError: '' })
+                }
+            }
         }
 
         if (this.state.ActionType === "Assign") {
@@ -912,7 +953,7 @@ class Dashboard extends React.Component {
             }
         }
 
-        if (this.state.ActionType !== "AcceptToClose" && this.state.ActionType !== "Reopen" && this.state.ActionType !== "Comments") {
+        if (this.state.ActionType !== "AcceptToClose" && this.state.ActionType !== "Reopen" && this.state.ActionType !== "Comments" && this.state.ActionType !== "Hold") {
             var numberOfHoursWorked = this.refs.hoursWorked._lastNativeText;
             var budgetedQuantity = this.state.TaskInfo["Quantity"];
 
