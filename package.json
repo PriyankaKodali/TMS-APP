@@ -11,7 +11,7 @@
     "moment": "^2.22.2",
     "native-base": "^2.8.1",
     "react": "16.6.0-alpha.8af6728",
-    "react-native": "0.57.3",
+    "react-native": "0.57.8",
     "react-native-background-geolocation": "^2.14.2",
     "react-native-collapsible": "^1.2.1",
     "react-native-datepicker-dialog": "0.0.9",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "babel-jest": "23.6.0",
-    "jest": "23.6.0",
+    "jest": "29.3.1",
     "metro-react-native-babel-preset": "0.48.1",
     "react-test-renderer": "16.6.0-alpha.8af6728"
   },
